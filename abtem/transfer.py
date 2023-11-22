@@ -9,6 +9,7 @@ from functools import reduce
 from typing import TYPE_CHECKING
 
 import numpy as np
+import self as self
 
 from abtem.core.axes import AxisMetadata, ParameterAxis
 from abtem.core.axes import OrdinalAxis
@@ -42,12 +43,12 @@ class BaseTransferFunction(
     """Base class for transfer functions."""
 
     def __init__(
-        self,
-        energy: float = None,
-        extent: float | tuple[float, float] = None,
-        gpts: int | tuple[int, int] = None,
-        sampling: float | tuple[float, float] = None,
-        distributions: tuple[str] = (),
+            self,
+            energy: float = None,
+            extent: float | tuple[float, float] = None,
+            gpts: int | tuple[int, int] = None,
+            sampling: float | tuple[float, float] = None,
+            distributions: tuple[str] = (),
     ):
         self._accelerator = Accelerator(energy=energy)
         self._grid = Grid(extent=extent, gpts=gpts, sampling=sampling)
@@ -99,9 +100,9 @@ class BaseTransferFunction(
         return self._evaluate_from_angular_grid(alpha, phi)
 
     def to_diffraction_patterns(
-        self,
-        max_angle: float = None,
-        gpts: int | tuple[int, int] = None,
+            self,
+            max_angle: float = None,
+            gpts: int | tuple[int, int] = None,
     ):
         """ """
         from abtem.measurements import DiffractionPatterns
@@ -143,13 +144,13 @@ class BaseAperture(BaseTransferFunction):
     """Base class for apertures. Documented in the subclasses."""
 
     def __init__(
-        self,
-        semiangle_cutoff: float | BaseDistribution = None,
-        energy: float = None,
-        extent: float | tuple[float, float] = None,
-        gpts: int | tuple[int, int] = None,
-        sampling: float | tuple[float, float] = None,
-        distributions: tuple[str] = (),
+            self,
+            semiangle_cutoff: float | BaseDistribution = None,
+            energy: float = None,
+            extent: float | tuple[float, float] = None,
+            gpts: int | tuple[int, int] = None,
+            sampling: float | tuple[float, float] = None,
+            distributions: tuple[str] = (),
     ):
         self._semiangle_cutoff = semiangle_cutoff
         super().__init__(
@@ -189,7 +190,7 @@ class BaseAperture(BaseTransferFunction):
         return self._semiangle_cutoff
 
     @semiangle_cutoff.setter
-    def semiangle_cutoff(self, semiangle_cutoff:float | BaseDistribution):
+    def semiangle_cutoff(self, semiangle_cutoff: float | BaseDistribution):
         self._semiangle_cutoff = semiangle_cutoff
 
     def _cropped_aperture(self):
@@ -213,10 +214,10 @@ class BaseAperture(BaseTransferFunction):
 
 
 def soft_aperture(
-    alpha: np.ndarray,
-    phi: np.ndarray,
-    semiangle_cutoff: float | np.ndarray,
-    angular_sampling: tuple[float, float],
+        alpha: np.ndarray,
+        phi: np.ndarray,
+        semiangle_cutoff: float | np.ndarray,
+        angular_sampling: tuple[float, float],
 ):
     """
     Calculates an array with a disk of ones and a soft edge.
@@ -311,13 +312,13 @@ class Aperture(BaseAperture):
     """
 
     def __init__(
-        self,
-        semiangle_cutoff: float | BaseDistribution,
-        soft: bool = True,
-        energy: float = None,
-        extent: float | tuple[float, float] = None,
-        gpts: int | tuple[int, int] = None,
-        sampling: float | tuple[float, float] = None,
+            self,
+            semiangle_cutoff: float | BaseDistribution,
+            soft: bool = True,
+            energy: float = None,
+            extent: float | tuple[float, float] = None,
+            gpts: int | tuple[int, int] = None,
+            sampling: float | tuple[float, float] = None,
     ):
         semiangle_cutoff = _validate_distribution(semiangle_cutoff)
         self._soft = soft
@@ -351,7 +352,7 @@ class Aperture(BaseAperture):
         return self._soft
 
     def _evaluate_from_angular_grid(
-        self, alpha: np.ndarray, phi: np.ndarray
+            self, alpha: np.ndarray, phi: np.ndarray
     ) -> np.ndarray:
         xp = get_array_module(alpha)
 
@@ -361,10 +362,10 @@ class Aperture(BaseAperture):
         semiangle_cutoff = xp.array(self.semiangle_cutoff) * 1e-3
 
         if (
-            self.soft
-            and self.grid.check_is_defined(False)
-            and not np.isscalar(alpha)
-            and not np.isscalar(phi)
+                self.soft
+                and self.grid.check_is_defined(False)
+                and not np.isscalar(alpha)
+                and not np.isscalar(phi)
         ):
             aperture = soft_aperture(
                 alpha, phi, semiangle_cutoff, self.angular_sampling
@@ -401,16 +402,16 @@ class Bullseye(BaseAperture):
     """
 
     def __init__(
-        self,
-        num_spokes: int,
-        spoke_width: float,
-        num_rings: int,
-        ring_width: float,
-        semiangle_cutoff: float,
-        energy: float = None,
-        extent: float | tuple[float, float] = None,
-        gpts: int | tuple[int, int] = None,
-        sampling: float | tuple[float, float] = None,
+            self,
+            num_spokes: int,
+            spoke_width: float,
+            num_rings: int,
+            ring_width: float,
+            semiangle_cutoff: float,
+            energy: float = None,
+            extent: float | tuple[float, float] = None,
+            gpts: int | tuple[int, int] = None,
+            sampling: float | tuple[float, float] = None,
     ):
         self._spoke_num = num_spokes
         self._spoke_width = spoke_width
@@ -445,7 +446,7 @@ class Bullseye(BaseAperture):
         return self._ring_width
 
     def _evaluate_from_angular_grid(
-        self, alpha: np.ndarray, phi: np.ndarray
+            self, alpha: np.ndarray, phi: np.ndarray
     ) -> np.ndarray:
         xp = get_array_module(alpha)
         alpha = xp.array(alpha)
@@ -456,9 +457,9 @@ class Bullseye(BaseAperture):
 
         # add crossbars
         array = array * (
-            ((phi + np.pi * self.spoke_width / (180 * 2)) * self.num_spokes)
-            % (2 * np.pi)
-            > (np.pi * self.spoke_width / 180 * self.num_spokes)
+                ((phi + np.pi * self.spoke_width / (180 * 2)) * self.num_spokes)
+                % (2 * np.pi)
+                > (np.pi * self.spoke_width / 180 * self.num_spokes)
         )
 
         # add ring bars
@@ -494,13 +495,13 @@ class Vortex(BaseAperture):
     """
 
     def __init__(
-        self,
-        quantum_number: int,
-        semiangle_cutoff: float,
-        energy: float = None,
-        extent: float | tuple[float, float] = None,
-        gpts: int | tuple[int, int] = None,
-        sampling: float | tuple[float, float] = None,
+            self,
+            quantum_number: int,
+            semiangle_cutoff: float,
+            energy: float = None,
+            extent: float | tuple[float, float] = None,
+            gpts: int | tuple[int, int] = None,
+            sampling: float | tuple[float, float] = None,
     ):
         self._quantum_number = quantum_number
         super().__init__(
@@ -517,7 +518,7 @@ class Vortex(BaseAperture):
         return self._quantum_number
 
     def _evaluate_from_angular_grid(
-        self, alpha: np.ndarray, phi: np.ndarray
+            self, alpha: np.ndarray, phi: np.ndarray
     ) -> np.ndarray:
         xp = get_array_module(alpha)
         alpha = xp.array(alpha)
@@ -553,14 +554,14 @@ class Zernike(BaseAperture):
     """
 
     def __init__(
-        self,
-        center_hole_cutoff: float,
-        phase_shift: float,
-        semiangle_cutoff: float,
-        energy: float = None,
-        extent: float | tuple[float, float] = None,
-        gpts: int | tuple[int, int] = None,
-        sampling: float | tuple[float, float] = None,
+            self,
+            center_hole_cutoff: float,
+            phase_shift: float,
+            semiangle_cutoff: float,
+            energy: float = None,
+            extent: float | tuple[float, float] = None,
+            gpts: int | tuple[int, int] = None,
+            sampling: float | tuple[float, float] = None,
     ):
         self._center_hole_cutoff = center_hole_cutoff
         self._phase_shift = phase_shift
@@ -584,7 +585,7 @@ class Zernike(BaseAperture):
         return self._phase_shift
 
     def _evaluate_from_angular_grid(
-        self, alpha: np.ndarray, phi: np.ndarray
+            self, alpha: np.ndarray, phi: np.ndarray
     ) -> np.ndarray:
         xp = get_array_module(alpha)
         alpha = xp.array(alpha)
@@ -624,12 +625,12 @@ class TemporalEnvelope(BaseTransferFunction):
     """
 
     def __init__(
-        self,
-        focal_spread: float | BaseDistribution,
-        energy: float = None,
-        extent: float | tuple[float, float] = None,
-        gpts: int | tuple[int, int] = None,
-        sampling: float | tuple[float, float] = None,
+            self,
+            focal_spread: float | BaseDistribution,
+            energy: float = None,
+            extent: float | tuple[float, float] = None,
+            gpts: int | tuple[int, int] = None,
+            sampling: float | tuple[float, float] = None,
     ):
         self._accelerator = Accelerator(energy=energy)
         self._focal_spread = _validate_distribution(focal_spread)
@@ -657,7 +658,7 @@ class TemporalEnvelope(BaseTransferFunction):
         )
 
     def _evaluate_from_angular_grid(
-        self, alpha: np.ndarray, phi: np.ndarray
+            self, alpha: np.ndarray, phi: np.ndarray
     ) -> np.ndarray:
         xp = get_array_module(alpha)
 
@@ -668,7 +669,7 @@ class TemporalEnvelope(BaseTransferFunction):
         alpha = xp.expand_dims(alpha, axis=tuple(range(0, self._num_ensemble_axes)))
 
         array = xp.exp(
-            -((0.5 * xp.pi / self.wavelength * focal_spread * alpha**2) ** 2)
+            -((0.5 * xp.pi / self.wavelength * focal_spread * alpha ** 2) ** 2)
         ).astype(xp.float32)
 
         return array
@@ -786,6 +787,76 @@ class _HasAberrations:
         "_aberration_coefficients", "C5"
     )
 
+    C12a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C12a"
+    )
+    C12b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C12b"
+    )
+    C21a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C21a"
+    )
+    C21b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C21b"
+    )
+    C23a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C23a"
+    )
+    C23b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C23b"
+    )
+    C30: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C30"
+    )
+    C32a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C32a"
+    )
+    C32b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C32b"
+    )
+    C34a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C34a"
+    )
+    C34b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C34b"
+    )
+    C41a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C41a"
+    )
+    C41b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C41b"
+    )
+    C43a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C43a"
+    )
+    C43b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C43b"
+    )
+    C45a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C45a"
+    )
+    C45b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C45b"
+    )
+    C52a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C52a"
+    )
+    C52b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C52b"
+    )
+    C54a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C54a"
+    )
+    C54b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C54b"
+    )
+    C56a: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C56a"
+    )
+    C56b: float | BaseDistribution = _aberration_property(
+        "_aberration_coefficients", "C56b"
+    )
+
     @property
     def defocus(self) -> float | BaseDistribution:
         """Defocus equivalent to negative C10."""
@@ -805,6 +876,12 @@ class _HasAberrations:
             var for var in dir(_HasAberrations) if re.fullmatch("phi[0-9][0-9]", var)
         )
 
+    @classmethod
+    def _cartesian_symbols(cls):
+        return tuple(
+            var for var in dir(_HasAberrations) if re.fullmatch("C[0-9][0-9][a,b]", var)
+        )
+
     def _nonzero_coefficients(self, symbols):
         for symbol in symbols:
             if not np.isscalar(self._aberration_coefficients[symbol]):
@@ -815,9 +892,16 @@ class _HasAberrations:
 
         return False
 
+    def _cartesian_aberrations(self) -> bool:
+        if 'C12a' in self._aberration_coefficients.keys():
+            return True
+        else:
+            return False
+
     @classmethod
     def _symbols(cls):
-        return cls._coefficient_symbols() + cls._angular_symbols()
+        return cls._coefficient_symbols() + cls._angular_symbols() + cls._cartesian_symbols()
+        # fine even contains duplicates
 
     @staticmethod
     def _aliases():
@@ -850,12 +934,13 @@ class _HasAberrations:
         }
 
     def _default_aberration_coefficients(self):
+        # this automatically returns one key-value even there are duplicates in the list of keys
         return {symbol: 0.0 for symbol in self._symbols()}
 
     @staticmethod
     def _check_is_valid_aberrations(aberrations):
         for key in aberrations.keys():
-            if (key not in polar_symbols) and (key not in polar_aliases.keys()):
+            if (key not in all_symbols) and (key not in polar_aliases.keys()):
                 raise ValueError("{} not a recognized phase aberration".format(key))
 
     @property
@@ -884,14 +969,14 @@ class _HasAberrations:
     @property
     def _has_aberrations(self) -> bool:
         if np.all(
-            [np.all(value == 0.0) for value in self._aberration_coefficients.values()]
+                [np.all(value == 0.0) for value in self._aberration_coefficients.values()]
         ):
             return False
         else:
             return True
 
     def set_aberrations(
-        self, aberration_coefficients: dict[str, float | BaseDistribution]
+            self, aberration_coefficients: dict[str, float | BaseDistribution],
     ):
         """
         Set the phase of the phase aberration.
@@ -934,7 +1019,7 @@ class _HasAberrations:
                 self._aberration_coefficients["C10"] = value
 
 
-polar_symbols = _HasAberrations._symbols()
+all_symbols = _HasAberrations._symbols()
 
 polar_aliases = _HasAberrations._aliases()
 
@@ -964,17 +1049,17 @@ class SpatialEnvelope(BaseTransferFunction, _HasAberrations):
     """
 
     def __init__(
-        self,
-        angular_spread: float | BaseDistribution,
-        aberration_coefficients: dict = None,
-        energy: float = None,
-        extent: float | tuple[float, float] = None,
-        gpts: int | tuple[int, int] = None,
-        sampling: float | tuple[float, float] = None,
-        **kwargs,
+            self,
+            angular_spread: float | BaseDistribution,
+            aberration_coefficients: dict = None,
+            energy: float = None,
+            extent: float | tuple[float, float] = None,
+            gpts: int | tuple[int, int] = None,
+            sampling: float | tuple[float, float] = None,
+            **kwargs,
     ):
         super().__init__(
-            distributions=polar_symbols + ("angular_spread",),
+            distributions=all_symbols + ("angular_spread",),
             energy=energy,
             extent=extent,
             gpts=gpts,
@@ -1010,7 +1095,7 @@ class SpatialEnvelope(BaseTransferFunction, _HasAberrations):
         self._angular_spread = value
 
     def _evaluate_from_angular_grid(
-        self, alpha: np.ndarray, phi: np.ndarray
+            self, alpha: np.ndarray, phi: np.ndarray
     ) -> np.ndarray:
         xp = get_array_module(alpha)
 
@@ -1018,7 +1103,7 @@ class SpatialEnvelope(BaseTransferFunction, _HasAberrations):
 
         unpacked, _ = _unpack_distributions(*args, shape=alpha.shape, xp=xp)
         angular_spread = unpacked[-1] / 1e3
-        parameters = dict(zip(polar_symbols, unpacked[:-1]))
+        parameters = dict(zip(all_symbols, unpacked[:-1]))
 
         alpha = xp.array(alpha)
         alpha = xp.expand_dims(alpha, axis=tuple(range(0, self._num_ensemble_axes)))
@@ -1026,99 +1111,99 @@ class SpatialEnvelope(BaseTransferFunction, _HasAberrations):
         xp = get_array_module(alpha)
 
         dchi_dk = (
-            2
-            * xp.pi
-            / self.wavelength
-            * (
-                (
-                    parameters["C12"] * xp.cos(2.0 * (phi - parameters["phi12"]))
-                    + parameters["C10"]
+                2
+                * xp.pi
+                / self.wavelength
+                * (
+                        (
+                                parameters["C12"] * xp.cos(2.0 * (phi - parameters["phi12"]))
+                                + parameters["C10"]
+                        )
+                        * alpha
+                        + (
+                                parameters["C23"] * xp.cos(3.0 * (phi - parameters["phi23"]))
+                                + parameters["C21"] * xp.cos(1.0 * (phi - parameters["phi21"]))
+                        )
+                        * alpha ** 2
+                        + (
+                                parameters["C34"] * xp.cos(4.0 * (phi - parameters["phi34"]))
+                                + parameters["C32"] * xp.cos(2.0 * (phi - parameters["phi32"]))
+                                + parameters["C30"]
+                        )
+                        * alpha ** 3
+                        + (
+                                parameters["C45"] * xp.cos(5.0 * (phi - parameters["phi45"]))
+                                + parameters["C43"] * xp.cos(3.0 * (phi - parameters["phi43"]))
+                                + parameters["C41"] * xp.cos(1.0 * (phi - parameters["phi41"]))
+                        )
+                        * alpha ** 4
+                        + (
+                                parameters["C56"] * xp.cos(6.0 * (phi - parameters["phi56"]))
+                                + parameters["C54"] * xp.cos(4.0 * (phi - parameters["phi54"]))
+                                + parameters["C52"] * xp.cos(2.0 * (phi - parameters["phi52"]))
+                                + parameters["C50"]
+                        )
+                        * alpha ** 5
                 )
-                * alpha
-                + (
-                    parameters["C23"] * xp.cos(3.0 * (phi - parameters["phi23"]))
-                    + parameters["C21"] * xp.cos(1.0 * (phi - parameters["phi21"]))
-                )
-                * alpha**2
-                + (
-                    parameters["C34"] * xp.cos(4.0 * (phi - parameters["phi34"]))
-                    + parameters["C32"] * xp.cos(2.0 * (phi - parameters["phi32"]))
-                    + parameters["C30"]
-                )
-                * alpha**3
-                + (
-                    parameters["C45"] * xp.cos(5.0 * (phi - parameters["phi45"]))
-                    + parameters["C43"] * xp.cos(3.0 * (phi - parameters["phi43"]))
-                    + parameters["C41"] * xp.cos(1.0 * (phi - parameters["phi41"]))
-                )
-                * alpha**4
-                + (
-                    parameters["C56"] * xp.cos(6.0 * (phi - parameters["phi56"]))
-                    + parameters["C54"] * xp.cos(4.0 * (phi - parameters["phi54"]))
-                    + parameters["C52"] * xp.cos(2.0 * (phi - parameters["phi52"]))
-                    + parameters["C50"]
-                )
-                * alpha**5
-            )
         )
 
         dchi_dphi = (
-            -2
-            * xp.pi
-            / self.wavelength
-            * (
-                1
-                / 2.0
-                * (2.0 * parameters["C12"] * xp.sin(2.0 * (phi - parameters["phi12"])))
-                * alpha
-                + 1
-                / 3.0
+                -2
+                * xp.pi
+                / self.wavelength
                 * (
-                    3.0 * parameters["C23"] * xp.sin(3.0 * (phi - parameters["phi23"]))
-                    + 1.0
-                    * parameters["C21"]
-                    * xp.sin(1.0 * (phi - parameters["phi21"]))
+                        1
+                        / 2.0
+                        * (2.0 * parameters["C12"] * xp.sin(2.0 * (phi - parameters["phi12"])))
+                        * alpha
+                        + 1
+                        / 3.0
+                        * (
+                                3.0 * parameters["C23"] * xp.sin(3.0 * (phi - parameters["phi23"]))
+                                + 1.0
+                                * parameters["C21"]
+                                * xp.sin(1.0 * (phi - parameters["phi21"]))
+                        )
+                        * alpha ** 2
+                        + 1
+                        / 4.0
+                        * (
+                                4.0 * parameters["C34"] * xp.sin(4.0 * (phi - parameters["phi34"]))
+                                + 2.0
+                                * parameters["C32"]
+                                * xp.sin(2.0 * (phi - parameters["phi32"]))
+                        )
+                        * alpha ** 3
+                        + 1
+                        / 5.0
+                        * (
+                                5.0 * parameters["C45"] * xp.sin(5.0 * (phi - parameters["phi45"]))
+                                + 3.0
+                                * parameters["C43"]
+                                * xp.sin(3.0 * (phi - parameters["phi43"]))
+                                + 1.0
+                                * parameters["C41"]
+                                * xp.sin(1.0 * (phi - parameters["phi41"]))
+                        )
+                        * alpha ** 4
+                        + (1 / 6.0)
+                        * (
+                                6.0 * parameters["C56"] * xp.sin(6.0 * (phi - parameters["phi56"]))
+                                + 4.0
+                                * parameters["C54"]
+                                * xp.sin(4.0 * (phi - parameters["phi54"]))
+                                + 2.0
+                                * parameters["C52"]
+                                * xp.sin(2.0 * (phi - parameters["phi52"]))
+                        )
+                        * alpha ** 5
                 )
-                * alpha**2
-                + 1
-                / 4.0
-                * (
-                    4.0 * parameters["C34"] * xp.sin(4.0 * (phi - parameters["phi34"]))
-                    + 2.0
-                    * parameters["C32"]
-                    * xp.sin(2.0 * (phi - parameters["phi32"]))
-                )
-                * alpha**3
-                + 1
-                / 5.0
-                * (
-                    5.0 * parameters["C45"] * xp.sin(5.0 * (phi - parameters["phi45"]))
-                    + 3.0
-                    * parameters["C43"]
-                    * xp.sin(3.0 * (phi - parameters["phi43"]))
-                    + 1.0
-                    * parameters["C41"]
-                    * xp.sin(1.0 * (phi - parameters["phi41"]))
-                )
-                * alpha**4
-                + (1 / 6.0)
-                * (
-                    6.0 * parameters["C56"] * xp.sin(6.0 * (phi - parameters["phi56"]))
-                    + 4.0
-                    * parameters["C54"]
-                    * xp.sin(4.0 * (phi - parameters["phi54"]))
-                    + 2.0
-                    * parameters["C52"]
-                    * xp.sin(2.0 * (phi - parameters["phi52"]))
-                )
-                * alpha**5
-            )
         )
 
         array = xp.exp(
             -xp.sign(angular_spread)
             * (angular_spread / 2) ** 2
-            * (dchi_dk**2 + dchi_dphi**2)
+            * (dchi_dk ** 2 + dchi_dphi ** 2)
         )
 
         return array
@@ -1146,16 +1231,16 @@ class Aberrations(BaseTransferFunction, _HasAberrations):
     """
 
     def __init__(
-        self,
-        aberration_coefficients: dict[str, float | BaseDistribution] = None,
-        energy: float = None,
-        extent: float | tuple[float, float] = None,
-        gpts: int | tuple[int, int] = None,
-        sampling: float | tuple[float, float] = None,
-        **kwargs,
+            self,
+            aberration_coefficients: dict[str, float | BaseDistribution] = None,
+            energy: float = None,
+            extent: float | tuple[float, float] = None,
+            gpts: int | tuple[int, int] = None,
+            sampling: float | tuple[float, float] = None,
+            **kwargs,
     ):
         super().__init__(
-            distributions=polar_symbols,
+            distributions=all_symbols,
             energy=energy,
             extent=extent,
             gpts=gpts,
@@ -1184,7 +1269,7 @@ class Aberrations(BaseTransferFunction, _HasAberrations):
         self.C10 = -value
 
     def _evaluate_from_angular_grid(
-        self, alpha: np.ndarray, phi: np.ndarray
+            self, alpha: np.ndarray, phi: np.ndarray
     ) -> np.ndarray:
         xp = get_array_module(alpha)
 
@@ -1195,7 +1280,7 @@ class Aberrations(BaseTransferFunction, _HasAberrations):
             *tuple(self.aberration_coefficients.values()), shape=alpha.shape, xp=xp
         )
 
-        parameters = dict(zip(polar_symbols, parameters))
+        parameters = dict(zip(all_symbols, parameters))  # add user provided and unspecified coeff together
 
         axis = tuple(range(0, len(self.ensemble_shape)))
         alpha = xp.expand_dims(alpha, axis=axis)
@@ -1204,64 +1289,137 @@ class Aberrations(BaseTransferFunction, _HasAberrations):
         array = xp.zeros(alpha.shape, dtype=np.float32)
         if self._nonzero_coefficients(("C10", "C12", "phi12")):
             array = array + (
-                1
-                / 2
-                * alpha**2
-                * (
-                    parameters["C10"]
-                    + parameters["C12"] * xp.cos(2 * (phi - parameters["phi12"]))
-                )
+                    1
+                    / 2
+                    * alpha ** 2
+                    * (
+                            parameters["C10"]
+                            + parameters["C12"] * xp.cos(2 * (phi - parameters["phi12"]))
+                    )
             )
 
         if self._nonzero_coefficients(("C21", "phi21", "C23", "phi23")):
             array = array + (
-                1
-                / 3
-                * alpha**3
-                * (
-                    parameters["C21"] * xp.cos(phi - parameters["phi21"])
-                    + parameters["C23"] * xp.cos(3 * (phi - parameters["phi23"]))
-                )
+                    1
+                    / 3
+                    * alpha ** 3
+                    * (
+                            parameters["C21"] * xp.cos(phi - parameters["phi21"])
+                            + parameters["C23"] * xp.cos(3 * (phi - parameters["phi23"]))
+                    )
             )
 
         if self._nonzero_coefficients(("C30", "C32", "phi32", "C34", "phi34")):
             array = array + (
-                1
-                / 4
-                * alpha**4
-                * (
-                    parameters["C30"]
-                    + parameters["C32"] * xp.cos(2 * (phi - parameters["phi32"]))
-                    + parameters["C34"] * xp.cos(4 * (phi - parameters["phi34"]))
-                )
+                    1
+                    / 4
+                    * alpha ** 4
+                    * (
+                            parameters["C30"]
+                            + parameters["C32"] * xp.cos(2 * (phi - parameters["phi32"]))
+                            + parameters["C34"] * xp.cos(4 * (phi - parameters["phi34"]))
+                    )
             )
 
         if self._nonzero_coefficients(("C41", "phi41", "C43", "phi43", "C45", "phi45")):
             array = array + (
-                1
-                / 5
-                * alpha**5
-                * (
-                    parameters["C41"] * xp.cos((phi - parameters["phi41"]))
-                    + parameters["C43"] * xp.cos(3 * (phi - parameters["phi43"]))
-                    + parameters["C45"] * xp.cos(5 * (phi - parameters["phi45"]))
-                )
+                    1
+                    / 5
+                    * alpha ** 5
+                    * (
+                            parameters["C41"] * xp.cos((phi - parameters["phi41"]))
+                            + parameters["C43"] * xp.cos(3 * (phi - parameters["phi43"]))
+                            + parameters["C45"] * xp.cos(5 * (phi - parameters["phi45"]))
+                    )
             )
 
         if self._nonzero_coefficients(
-            ("C50", "C52", "phi52", "C54", "phi54", "C56", "phi56")
+                ("C50", "C52", "phi52", "C54", "phi54", "C56", "phi56")
         ):
             array = array + (
-                1
-                / 6
-                * alpha**6
-                * (
-                    parameters["C50"]
-                    + parameters["C52"] * xp.cos(2 * (phi - parameters["phi52"]))
-                    + parameters["C54"] * xp.cos(4 * (phi - parameters["phi54"]))
-                    + parameters["C56"] * xp.cos(6 * (phi - parameters["phi56"]))
-                )
+                    1
+                    / 6
+                    * alpha ** 6
+                    * (
+                            parameters["C50"]
+                            + parameters["C52"] * xp.cos(2 * (phi - parameters["phi52"]))
+                            + parameters["C54"] * xp.cos(4 * (phi - parameters["phi54"]))
+                            + parameters["C56"] * xp.cos(6 * (phi - parameters["phi56"]))
+                    )
             )
+
+        array *= np.float32(2 * xp.pi / self.wavelength)
+        array = complex_exponential(-array)
+
+        if cp is not None:
+            weights = cp.asnumpy(weights)
+
+        if weights is not None:
+            array = xp.asarray(weights, dtype=xp.float32) * array
+
+        return array
+
+    def cartesian_coordinates(self, alpha: np.ndarray, phi: np.ndarray) -> (np.ndarray, np.ndarray):
+        """Calculate a Cartesian grid for a given polar grid
+        alpha:rad, 2d array, phi:rad, 2d array
+        returns:
+        u,v: 2d array, A-1
+        """
+        u = alpha * np.cos(phi) / self.wavelength
+        v = alpha * np.sin(phi) / self.wavelength
+        return u, v
+
+    def _evaluate_from_cartesian_grid(
+            self, alpha: np.ndarray, phi: np.ndarray
+    ) -> np.ndarray:
+        xp = get_array_module(alpha)
+
+        if not self._has_aberrations:
+            return xp.ones(self.ensemble_shape + alpha.shape, dtype=xp.complex64)
+
+        parameters, weights = _unpack_distributions(
+            *tuple(self.aberration_coefficients.values()), shape=alpha.shape, xp=xp
+        )
+
+        parameters = dict(zip(all_symbols, parameters))
+
+        axis = tuple(range(0, len(self.ensemble_shape)))
+        alpha = xp.expand_dims(alpha, axis=axis)
+        phi = xp.expand_dims(phi, axis=axis).astype(xp.float32)
+        # transfer alpha(rad) and phi(rad) into u(A-1), v(A-1)
+        u, v = self.cartesian_coordinates(alpha, phi)
+        array = xp.zeros(u.shape, dtype=np.float32)
+        if self._nonzero_coefficients(("C10", "C12a", "C12b")):
+            array = array + 1 / 2 * (parameters["C10"] * (u ** 2 + v ** 2)
+                                     + parameters["C12a"] * (u ** 2 - v ** 2)
+                                     + 2 * parameters["C12b"] * u * v
+                                     )
+
+        if self._nonzero_coefficients(("C21a", "C21b", "C23a", "C23b")):
+            array = array + 1 / 3 * (parameters["C21a"] * (u ** 2 * u + u * v ** 2)
+                                     + parameters["C21b"] * (v ** 2 * v + v * u ** 2)
+                                     + parameters["C23a"] * (u ** 2 * u - 3 * u * v ** 2)
+                                     + parameters["C23b"] * (- v ** 2 * v + 3 * v * u ** 2)
+                                     )
+
+        if self._nonzero_coefficients(("C30", "C32a", "C32b", "C34a", "C34b")):
+            array = array + 1 / 4 * (parameters["C30"] * (u ** 4 + 2 * v ** 2 * u ** 2 + v ** 4)
+                                     + parameters["C32a"] * (u ** 4 - v ** 4)
+                                     + parameters["C32b"] * 2 * (u * v * u ** 2 + u * v * v ** 2)
+                                     + parameters["C34a"] * (u ** 4 - 6 * u ** 2 * v ** 2 + v ** 4)
+                                     + parameters["C34b"] * 4 * (u ** 3 * v - u * v ** 3)
+                                     )
+
+        if self._nonzero_coefficients(('C41a', 'C41b', 'C43a', 'C43b', 'C45a', 'C45b')):
+            array = array + 1 / 5 * (parameters["C41a"] * u * (u ** 2 + v ** 2) ** 2
+                                     + parameters["C41b"] * v * (u ** 2 + v ** 2) ** 2
+                                     + parameters["C43a"] * (
+                                                 4 * u ** 3 * (u ** 2 + v ** 2) - 3 * u * (u ** 2 + v ** 2) ** 2)
+                                     + parameters["C43b"] * (
+                                                 -4 * v ** 3 * (u ** 2 + v ** 2) + 3 * v * (u ** 2 + v ** 2) ** 2)
+                                     + parameters["C45a"] * (u ** 5 - 10 * u ** 3 * v ** 2 + 5 * u * v ** 4)
+                                     + parameters["C45b"] * (v ** 5 - 10 * u ** 2 * v ** 3 + 5 * u ** 4 * v)
+                                     )
 
         array *= np.float32(2 * xp.pi / self.wavelength)
         array = complex_exponential(-array)
@@ -1327,27 +1485,27 @@ class CTF(_HasAberrations, BaseAperture):
     """
 
     def __init__(
-        self,
-        semiangle_cutoff: float | BaseDistribution = np.inf,
-        soft: bool = True,
-        focal_spread: float | BaseDistribution = 0.0,
-        angular_spread: float | BaseDistribution = 0.0,
-        aberration_coefficients: dict[str, float | BaseDistribution] = None,
-        energy: float = None,
-        extent: float | tuple[float, float] = None,
-        gpts: int | tuple[int, int] = None,
-        sampling: float | tuple[float, float] = None,
-        flip_phase: bool = False,
-        wiener_snr: float = 0.0,
-        **kwargs,
+            self,
+            semiangle_cutoff: float | BaseDistribution = np.inf,
+            soft: bool = True,
+            focal_spread: float | BaseDistribution = 0.0,
+            angular_spread: float | BaseDistribution = 0.0,
+            aberration_coefficients: dict[str, float | BaseDistribution] = None,
+            energy: float = None,
+            extent: float | tuple[float, float] = None,
+            gpts: int | tuple[int, int] = None,
+            sampling: float | tuple[float, float] = None,
+            flip_phase: bool = False,
+            wiener_snr: float = 0.0,
+            **kwargs,
     ):
         super().__init__(
-            distributions=polar_symbols
-            + (
-                "angular_spread",
-                "focal_spread",
-                "semiangle_cutoff",
-            ),
+            distributions=all_symbols
+                          + (
+                              "angular_spread",
+                              "focal_spread",
+                              "semiangle_cutoff",
+                          ),
             energy=energy,
             semiangle_cutoff=semiangle_cutoff,
             extent=extent,
@@ -1431,9 +1589,9 @@ class CTF(_HasAberrations, BaseAperture):
     @property
     def ensemble_axes_metadata(self):
         return (
-            self._spatial_envelope.ensemble_axes_metadata
-            + self._temporal_envelope.ensemble_axes_metadata
-            + self._aperture.ensemble_axes_metadata
+                self._spatial_envelope.ensemble_axes_metadata
+                + self._temporal_envelope.ensemble_axes_metadata
+                + self._aperture.ensemble_axes_metadata
         )
 
     @property
@@ -1499,8 +1657,11 @@ class CTF(_HasAberrations, BaseAperture):
 
     def _evaluate_from_angular_grid(self, alpha, phi, keep_all: bool = False):
         match_dims = tuple(range(-len(alpha.shape), 0))
-
-        array = self._aberrations._evaluate_from_angular_grid(alpha, phi)
+        # A condition work but not safe enough
+        if self._aberrations.C12a!= 0 and self._aberrations.C12 == 0:
+            array = self._aberrations._evaluate_from_cartesian_grid(alpha, phi)
+        else:
+            array = self._aberrations._evaluate_from_angular_grid(alpha, phi)
 
         if self._spatial_envelope.angular_spread != 0.0:
             new_aberrations_dims = tuple(range(len(self._aberrations.ensemble_shape)))
@@ -1508,8 +1669,8 @@ class CTF(_HasAberrations, BaseAperture):
 
             added_dims = int(hasattr(self._spatial_envelope.angular_spread, "values"))
             new_match_dims = (
-                tuple(range(len(self._spatial_envelope.ensemble_shape) - added_dims))
-                + match_dims
+                    tuple(range(len(self._spatial_envelope.ensemble_shape) - added_dims))
+                    + match_dims
             )
 
             new_array = self._spatial_envelope._evaluate_from_angular_grid(alpha, phi)
@@ -1535,9 +1696,9 @@ class CTF(_HasAberrations, BaseAperture):
 
         if self._wiener_snr != 0.0:
             return (
-                (1 + 1 / self._wiener_snr)
-                * array**2
-                / (array**2 + 1 / self._wiener_snr)
+                    (1 + 1 / self._wiener_snr)
+                    * array ** 2
+                    / (array ** 2 + 1 / self._wiener_snr)
             )
 
         elif self._flip_phase:
@@ -1547,14 +1708,14 @@ class CTF(_HasAberrations, BaseAperture):
             return array
 
     def to_point_spread_functions(
-        self, gpts: int | tuple[int, int], extent: float | tuple[float, float]
+            self, gpts: int | tuple[int, int], extent: float | tuple[float, float]
     ):
         from abtem.waves import Probe
 
         return (
             Probe(gpts=gpts, extent=extent, energy=self.energy, aperture=self)
-            .build()
-            .complex_images()
+                .build()
+                .complex_images()
         )
 
     def profiles(self, gpts: int = 1000, max_angle: float = None, phi: float = 0.0):
@@ -1710,12 +1871,12 @@ def polar2cartesian(polar):
     cartesian["C34a"] = polar["C34"] * np.cos(-4 * polar["phi34"])
     k = np.sqrt(3 + np.sqrt(8.0))
     cartesian["C34b"] = (
-        1
-        / 4.0
-        * (1 + k**2) ** 2
-        / (k**3 - k)
-        * polar["C34"]
-        * np.cos(4 * np.arctan(1 / k) - 4 * polar["phi34"])
+            1
+            / 4.0
+            * (1 + k ** 2) ** 2
+            / (k ** 3 - k)
+            * polar["C34"]
+            * np.cos(4 * np.arctan(1 / k) - 4 * polar["phi34"])
     )
 
     return cartesian
