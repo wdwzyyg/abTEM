@@ -9,7 +9,6 @@ from functools import reduce
 from typing import TYPE_CHECKING
 
 import numpy as np
-import self as self
 
 from abtem.core.axes import AxisMetadata, ParameterAxis
 from abtem.core.axes import OrdinalAxis
@@ -1363,10 +1362,10 @@ class Aberrations(BaseTransferFunction, _HasAberrations):
         """Calculate a Cartesian grid for a given polar grid
         alpha:rad, 2d array, phi:rad, 2d array
         returns:
-        u,v: 2d array, A-1
+        u,v: 2d array, rad now
         """
-        u = alpha * np.cos(phi) / self.wavelength
-        v = alpha * np.sin(phi) / self.wavelength
+        u = alpha * np.cos(phi)
+        v = alpha * np.sin(phi)
         return u, v
 
     def _evaluate_from_cartesian_grid(
